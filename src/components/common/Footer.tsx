@@ -106,7 +106,12 @@ export function Footer() {
           <p>
             © 2026–27 Kollam District Sahodaya Complex. All rights reserved.
           </p>
-          <p>Real-Time Firestore Scoreboard Architecture</p>
+          <p className="inline-flex items-center gap-1.5 text-slate-400">
+            <span>Powered by</span>
+            <span className="rounded-lg bg-gradient-to-r from-amber-400/20 to-royal-500/20 border border-amber-400/40 px-2.5 py-1 font-extrabold tracking-wide text-amber-300 shadow-xs">
+              Techosa Robotics
+            </span>
+          </p>
         </div>
       </div>
     </footer>
