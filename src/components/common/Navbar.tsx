@@ -88,8 +88,8 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${isActive
-                    ? "bg-royal-50 text-royal-700 border border-royal-200/80"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-navy-900"
+                  ? "bg-royal-50 text-royal-700 border border-royal-200/80"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-navy-900"
                   }`}
               >
                 <Icon className="h-4 w-4" />
@@ -136,8 +136,8 @@ export function Navbar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold ${isActive
-                    ? "bg-royal-50 text-royal-700"
-                    : "text-slate-700 hover:bg-slate-50"
+                  ? "bg-royal-50 text-royal-700"
+                  : "text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 <Icon className="h-4 w-4" />
@@ -160,4 +160,5 @@ export function Navbar() {
     </header>
   );
 }
+
 

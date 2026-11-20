@@ -27,7 +27,7 @@ export default function LeaderboardPage() {
 
       {/* Top Bar with Category Switching Tabs only (Big-Screen Display Optimized) */}
       <div className="bg-navy-900 border-b border-navy-800 py-3.5">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center sm:justify-between gap-3">
+        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center sm:justify-between gap-3">
           <CategoryTabs
             activeTab={activeTab}
             onChange={setActiveTab}
@@ -41,8 +41,8 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      {/* Leaderboard Only with Auto-Scroll enabled for Big Screen */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 sm:px-6 lg:px-8">
+      {/* Leaderboard Only with Auto-Scroll & Extra-Large Font enabled for Big Screen */}
+      <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-4 sm:px-6 lg:px-8">
         {isLoading ? (
           <LoadingSpinner />
         ) : (
@@ -54,6 +54,7 @@ export default function LeaderboardPage() {
                 title="CATEGORY I – LKG & UKG LEADERBOARD"
                 subtitle="Standings across all 7 Category I events"
                 autoScroll={true}
+                largeScreen={true}
               />
             )}
             {activeTab === "CATEGORY_II" && (
@@ -63,6 +64,7 @@ export default function LeaderboardPage() {
                 title="CATEGORY II – CLASS I & II LEADERBOARD"
                 subtitle="Standings across all 16 Category II events"
                 autoScroll={true}
+                largeScreen={true}
               />
             )}
             {activeTab === "OVERALL" && (
@@ -72,6 +74,7 @@ export default function LeaderboardPage() {
                 title="OVERALL COMBINED LEADERBOARD"
                 subtitle="Combined totals with distinct Category I and Category II point columns"
                 autoScroll={true}
+                largeScreen={true}
               />
             )}
           </>

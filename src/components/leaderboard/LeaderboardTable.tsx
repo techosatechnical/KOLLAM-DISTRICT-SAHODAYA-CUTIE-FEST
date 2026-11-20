@@ -23,6 +23,7 @@ interface LeaderboardTableProps {
   maxRows?: number;
   linkToSchoolDetails?: boolean;
   autoScroll?: boolean;
+  largeScreen?: boolean;
   scrollContainerClassName?: string;
 }
 
@@ -35,6 +36,7 @@ export function LeaderboardTable({
   maxRows,
   linkToSchoolDetails = true,
   autoScroll = false,
+  largeScreen = false,
   scrollContainerClassName = "",
 }: LeaderboardTableProps) {
   const displayedEntries = maxRows ? entries.slice(0, maxRows) : entries;
@@ -230,32 +232,67 @@ export function LeaderboardTable({
       >
         <table className="w-full text-left border-collapse">
           <thead className={autoScroll ? "sticky top-0 z-10 shadow-xs" : ""}>
-            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <th className="py-3.5 pl-4 pr-2 sm:px-5 w-24 bg-slate-50">Rank</th>
-              <th className="py-3.5 px-3 sm:px-4 bg-slate-50">School</th>
+            <tr
+              className={`border-b border-slate-200 bg-slate-50 font-extrabold uppercase tracking-wider text-slate-600 ${
+                largeScreen ? "text-xs sm:text-sm" : "text-[11px] sm:text-xs"
+              }`}
+            >
+              <th
+                className={`${
+                  largeScreen ? "py-4 pl-5 pr-3 w-28" : "py-3.5 pl-4 pr-2 sm:px-5 w-24"
+                } bg-slate-50`}
+              >
+                Rank
+              </th>
+              <th
+                className={`${
+                  largeScreen ? "py-4 px-4" : "py-3.5 px-3 sm:px-4"
+                } bg-slate-50`}
+              >
+                School
+              </th>
               {!compact && mode === "OVERALL" && (
                 <>
-                  <th className="hidden md:table-cell py-3.5 px-3 text-right bg-slate-50">
+                  <th
+                    className={`hidden md:table-cell ${
+                      largeScreen ? "py-4 px-4" : "py-3.5 px-3"
+                    } text-right bg-slate-50`}
+                  >
                     Cat I (LKG/UKG)
                   </th>
-                  <th className="hidden md:table-cell py-3.5 px-3 text-right bg-slate-50">
+                  <th
+                    className={`hidden md:table-cell ${
+                      largeScreen ? "py-4 px-4" : "py-3.5 px-3"
+                    } text-right bg-slate-50`}
+                  >
                     Cat II (Class I/II)
                   </th>
                 </>
               )}
               {!compact && (
-                <th className="hidden sm:table-cell py-3.5 px-3 text-center bg-slate-50">
+                <th
+                  className={`hidden sm:table-cell ${
+                    largeScreen ? "py-4 px-4" : "py-3.5 px-3"
+                  } text-center bg-slate-50`}
+                >
                   Placements (1st / 2nd / 3rd)
                 </th>
               )}
-              <th className="py-3.5 pl-3 pr-4 sm:px-5 text-right w-32 bg-slate-50">
+              <th
+                className={`${
+                  largeScreen
+                    ? "py-4 pl-4 pr-6 text-right w-40"
+                    : "py-3.5 pl-3 pr-4 sm:px-5 text-right w-32"
+                } bg-slate-50`}
+              >
                 {mode === "OVERALL" ? "Combined Points" : "Total Points"}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-sm">
+          <tbody className="divide-y divide-slate-100">
             {displayedEntries.map((entry) => {
               const rankStyle = getRankStyle(entry.rank, entry.points);
+              const uppercaseSchoolName = entry.school.name.toUpperCase();
 
               return (
                 <tr
@@ -263,10 +300,18 @@ export function LeaderboardTable({
                   className={`transition-colors ${rankStyle.row}`}
                 >
                   {/* Rank cell */}
-                  <td className="py-3.5 pl-4 pr-2 sm:px-5 whitespace-nowrap">
+                  <td
+                    className={`${
+                      largeScreen ? "py-4 pl-5 pr-3" : "py-3.5 pl-4 pr-2 sm:px-5"
+                    } whitespace-nowrap`}
+                  >
                     <div className="flex items-center gap-1.5">
                       <span
-                        className={`inline-flex items-center justify-center gap-1 rounded-xl px-2.5 py-1 text-xs min-w-[44px] ${rankStyle.badge}`}
+                        className={`inline-flex items-center justify-center gap-1.5 rounded-xl ${
+                          largeScreen
+                            ? "px-3.5 py-1.5 text-sm sm:text-base min-w-[56px]"
+                            : "px-2.5 py-1 text-xs sm:text-sm min-w-[46px]"
+                        } ${rankStyle.badge}`}
                       >
                         {rankStyle.icon}
                         <span>{rankStyle.label}</span>
@@ -279,26 +324,44 @@ export function LeaderboardTable({
                     </div>
                   </td>
 
-                  {/* School cell */}
-                  <td className="py-3.5 px-3 sm:px-4">
+                  {/* School cell (UPPERCASE & Larger Font) */}
+                  <td
+                    className={`${
+                      largeScreen ? "py-4 px-4" : "py-3.5 px-3 sm:px-4"
+                    }`}
+                  >
                     <div className="flex flex-col">
                       {linkToSchoolDetails ? (
                         <Link
                           href={`/schools/${entry.school.id}`}
-                          className="group inline-flex items-center gap-1 font-bold text-navy-900 hover:text-royal-600 transition-colors leading-snug"
+                          className={`group inline-flex items-center gap-1.5 uppercase tracking-wide text-navy-900 hover:text-royal-600 transition-colors leading-snug ${
+                            largeScreen
+                              ? "text-base sm:text-xl lg:text-2xl font-black"
+                              : compact
+                              ? "text-sm sm:text-base font-extrabold"
+                              : "text-base sm:text-lg font-extrabold"
+                          }`}
                         >
-                          <span>{entry.school.name}</span>
-                          <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-royal-600 shrink-0" />
+                          <span>{uppercaseSchoolName}</span>
+                          <ChevronRight className="h-4 w-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-royal-600 shrink-0" />
                         </Link>
                       ) : (
-                        <span className="font-bold text-navy-900 leading-snug">
-                          {entry.school.name}
+                        <span
+                          className={`uppercase tracking-wide text-navy-900 leading-snug ${
+                            largeScreen
+                              ? "text-base sm:text-xl lg:text-2xl font-black"
+                              : compact
+                              ? "text-sm sm:text-base font-extrabold"
+                              : "text-base sm:text-lg font-extrabold"
+                          }`}
+                        >
+                          {uppercaseSchoolName}
                         </span>
                       )}
 
                       {/* Mobile sub-row for overall category distinction */}
                       {mode === "OVERALL" && (
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 md:hidden">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500 md:hidden">
                           <span className="rounded bg-slate-100 px-1.5 py-0.5 font-medium">
                             Cat I:{" "}
                             <strong className="text-navy-900">
@@ -321,14 +384,26 @@ export function LeaderboardTable({
                   {/* Desktop Cat I & Cat II columns when in OVERALL mode */}
                   {!compact && mode === "OVERALL" && (
                     <>
-                      <td className="hidden md:table-cell py-3.5 px-3 text-right font-semibold text-slate-700">
+                      <td
+                        className={`hidden md:table-cell ${
+                          largeScreen
+                            ? "py-4 px-4 text-base sm:text-lg font-bold"
+                            : "py-3.5 px-3 text-sm sm:text-base font-semibold"
+                        } text-right text-slate-700 whitespace-nowrap`}
+                      >
                         {entry.school.category1Participation ? (
                           <span>{entry.school.category1Points} pts</span>
                         ) : (
                           <span className="text-xs text-slate-400">N/A</span>
                         )}
                       </td>
-                      <td className="hidden md:table-cell py-3.5 px-3 text-right font-semibold text-slate-700">
+                      <td
+                        className={`hidden md:table-cell ${
+                          largeScreen
+                            ? "py-4 px-4 text-base sm:text-lg font-bold"
+                            : "py-3.5 px-3 text-sm sm:text-base font-semibold"
+                        } text-right text-slate-700 whitespace-nowrap`}
+                      >
                         {entry.school.category2Participation ? (
                           <span>{entry.school.category2Points} pts</span>
                         ) : (
@@ -340,23 +415,43 @@ export function LeaderboardTable({
 
                   {/* Placements breakdown */}
                   {!compact && (
-                    <td className="hidden sm:table-cell py-3.5 px-3 text-center">
-                      <div className="inline-flex items-center gap-1.5 text-xs">
+                    <td
+                      className={`hidden sm:table-cell ${
+                        largeScreen ? "py-4 px-4" : "py-3.5 px-3"
+                      } text-center`}
+                    >
+                      <div
+                        className={`inline-flex items-center gap-2 ${
+                          largeScreen ? "text-sm sm:text-base" : "text-xs sm:text-sm"
+                        }`}
+                      >
                         <span
                           title="1st Places"
-                          className="inline-flex items-center justify-center rounded-md bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 font-bold min-w-[28px]"
+                          className={`inline-flex items-center justify-center rounded-md bg-amber-100 text-amber-900 border border-amber-200 font-extrabold ${
+                            largeScreen
+                              ? "px-2.5 py-1 min-w-[34px]"
+                              : "px-2 py-0.5 min-w-[28px]"
+                          }`}
                         >
                           {entry.firstPlaces}
                         </span>
                         <span
                           title="2nd Places"
-                          className="inline-flex items-center justify-center rounded-md bg-slate-100 text-slate-800 border border-slate-200 px-2 py-0.5 font-bold min-w-[28px]"
+                          className={`inline-flex items-center justify-center rounded-md bg-slate-100 text-slate-800 border border-slate-200 font-extrabold ${
+                            largeScreen
+                              ? "px-2.5 py-1 min-w-[34px]"
+                              : "px-2 py-0.5 min-w-[28px]"
+                          }`}
                         >
                           {entry.secondPlaces}
                         </span>
                         <span
                           title="3rd Places"
-                          className="inline-flex items-center justify-center rounded-md bg-orange-100 text-orange-900 border border-orange-200 px-2 py-0.5 font-bold min-w-[28px]"
+                          className={`inline-flex items-center justify-center rounded-md bg-orange-100 text-orange-900 border border-orange-200 font-extrabold ${
+                            largeScreen
+                              ? "px-2.5 py-1 min-w-[34px]"
+                              : "px-2 py-0.5 min-w-[28px]"
+                          }`}
                         >
                           {entry.thirdPlaces}
                         </span>
@@ -365,18 +460,34 @@ export function LeaderboardTable({
                   )}
 
                   {/* Total Points cell */}
-                  <td className="py-3.5 pl-3 pr-4 sm:px-5 text-right whitespace-nowrap">
+                  <td
+                    className={`${
+                      largeScreen
+                        ? "py-4 pl-4 pr-6"
+                        : "py-3.5 pl-3 pr-4 sm:px-5"
+                    } text-right whitespace-nowrap`}
+                  >
                     <span
-                      className={`inline-flex items-baseline gap-1 rounded-xl px-3 py-1 font-extrabold ${
+                      className={`inline-flex items-baseline gap-1 rounded-xl px-3.5 py-1.5 font-black ${
                         entry.rank === 1 && entry.points > 0
-                          ? "bg-amber-500/15 text-amber-950 text-base sm:text-lg"
+                          ? largeScreen
+                            ? "bg-amber-500/20 text-amber-950 text-xl sm:text-2xl lg:text-3xl"
+                            : "bg-amber-500/15 text-amber-950 text-lg sm:text-xl"
                           : entry.points > 0
-                          ? "bg-royal-50 text-royal-700 text-base"
-                          : "text-slate-400 text-sm"
+                          ? largeScreen
+                            ? "bg-royal-50 text-royal-700 text-lg sm:text-xl lg:text-2xl"
+                            : "bg-royal-50 text-royal-700 text-base sm:text-lg"
+                          : largeScreen
+                          ? "text-slate-400 text-base sm:text-lg"
+                          : "text-slate-400 text-sm sm:text-base"
                       }`}
                     >
                       <span>{entry.points}</span>
-                      <span className="text-[11px] font-semibold uppercase opacity-75">
+                      <span
+                        className={`${
+                          largeScreen ? "text-xs sm:text-sm" : "text-[11px]"
+                        } font-bold uppercase opacity-75`}
+                      >
                         pts
                       </span>
                     </span>
