@@ -565,20 +565,7 @@ export async function saveCompetitionResult(params: {
     );
   }
 
-  // 2. Duplicate check for same school & event
-  const duplicate = existingResults.find(
-    (r) =>
-      r.eventId === event.id &&
-      r.schoolId === school.id &&
-      r.id !== editingResultId
-  );
-  if (duplicate) {
-    throw new Error(
-      `A result already exists for ${school.name} in ${event.name}. Edit the existing result instead of creating a duplicate.`
-    );
-  }
-
-  // 3. Canonical scoring calculation (never trust manually supplied points)
+  // 2. Canonical scoring calculation (never trust manually supplied points)
   const canonicalScoringType =
     event.eventType === "GROUP_ITEM" ? "GROUP" : event.scoringType;
   const calculation = calculateScore({
@@ -589,7 +576,7 @@ export async function saveCompetitionResult(params: {
 
   const effectivePublicationStatus: PublicationStatus = publicationStatus;
 
-  // 4. Check for tied placements in the same event
+  // 3. Check for tied placements in the same event
   const tiedResults =
     position !== null
       ? existingResults.filter(
@@ -603,7 +590,10 @@ export async function saveCompetitionResult(params: {
 
   const now = new Date().toISOString();
   const resultId =
-    editingResultId || `res-${event.id}-${school.id}`;
+    editingResultId ||
+    `res-${event.id}-${school.id}-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 6)}`;
 
   const existingRecord = existingResults.find((r) => r.id === resultId);
 

@@ -174,16 +174,14 @@ export function ResultEntryForm({
     });
   }, [selectedGrade, selectedPosition, activeScoringType]);
 
-  // Check if a result already exists for this school + event
-  const duplicateExistingResult = useMemo(() => {
-    if (!selectedEventId || !selectedSchoolId) return null;
-    return (
-      existingResults.find(
-        (r) =>
-          r.eventId === selectedEventId &&
-          r.schoolId === selectedSchoolId &&
-          r.id !== initialResultToEdit?.id
-      ) || null
+  // Check existing entries for this school + event (multiple participants from the same school can score in the same event)
+  const existingEntriesForSchoolAndEvent = useMemo(() => {
+    if (!selectedEventId || !selectedSchoolId) return [];
+    return existingResults.filter(
+      (r) =>
+        r.eventId === selectedEventId &&
+        r.schoolId === selectedSchoolId &&
+        r.id !== initialResultToEdit?.id
     );
   }, [
     existingResults,
@@ -192,27 +190,34 @@ export function ResultEntryForm({
     initialResultToEdit?.id,
   ]);
 
-  // Check if another school already holds this position in the same event (Tie Warning per Rule 11)
+  const existingSchoolEventPoints = useMemo(
+    () =>
+      existingEntriesForSchoolAndEvent.reduce(
+        (sum, r) => sum + r.totalPoints,
+        0
+      ),
+    [existingEntriesForSchoolAndEvent]
+  );
+
+  // Check if another entry already holds this position in the same event (Tie Warning per Rule 11)
   const tiedPlacementResults = useMemo(() => {
     if (!selectedEventId || selectedPosition === null) return [];
     return existingResults.filter(
       (r) =>
         r.eventId === selectedEventId &&
         r.position === selectedPosition &&
-        r.schoolId !== selectedSchoolId &&
         r.id !== initialResultToEdit?.id
     );
   }, [
     existingResults,
     selectedEventId,
     selectedPosition,
-    selectedSchoolId,
     initialResultToEdit?.id,
   ]);
 
   const executeSave = async (
     values: ResultEntryFormValues,
-    overwriteId?: string
+    editId?: string
   ) => {
     if (!selectedEvent || !selectedSchool) return;
     setIsSubmitting(true);
@@ -226,16 +231,21 @@ export function ResultEntryForm({
         notes: values.notes,
         updatedBy: adminEmail,
         existingResults,
-        editingResultId: overwriteId || initialResultToEdit?.id,
+        editingResultId: editId,
       });
+
+      const newSchoolTotalInEvent =
+        existingSchoolEventPoints + savedResult.totalPoints;
 
       showToast({
         type: tiedWithSchools.length > 0 ? "warning" : "success",
         title: initialResultToEdit
           ? "Result Updated Successfully"
-          : "Result Saved Successfully",
+          : "Result Added Successfully",
         message:
-          tiedWithSchools.length > 0
+          existingEntriesForSchoolAndEvent.length > 0 && !initialResultToEdit
+            ? `Added +${savedResult.totalPoints} pts for ${selectedSchool.name} in ${selectedEvent.name} (Cumulative in event: ${newSchoolTotalInEvent} pts).`
+            : tiedWithSchools.length > 0
             ? `${selectedSchool.name} awarded ${savedResult.totalPoints} pts (Tied placement with ${tiedWithSchools.join(", ")}).`
             : `${selectedSchool.name} (${selectedEvent.name}): Grade ${savedResult.grade}, ${savedResult.totalPoints} Total Points.`,
       });
@@ -259,19 +269,10 @@ export function ResultEntryForm({
   const onFormSubmit = async (values: ResultEntryFormValues) => {
     if (!selectedEvent || !selectedSchool) return;
 
-    if (duplicateExistingResult) {
-      setConfirmMessage({
-        title: "Duplicate Result Detected – Confirm Correction",
-        description: `A result already exists for ${selectedSchool.name} in ${selectedEvent.name} (Grade ${duplicateExistingResult.grade}, ${duplicateExistingResult.totalPoints} pts). Do you want to overwrite it with this authorized correction?`,
-      });
-      setPendingConfirmPayload(values);
-      return;
-    }
-
     if (initialResultToEdit) {
       setConfirmMessage({
         title: "Confirm Result Modification",
-        description: `Are you sure you want to update the saved result for ${selectedSchool.name} in ${selectedEvent.name}? The live leaderboard will recalculate immediately.`,
+        description: `Are you sure you want to update this saved result for ${selectedSchool.name} in ${selectedEvent.name}? The live leaderboard will recalculate immediately.`,
       });
       setPendingConfirmPayload(values);
       return;
@@ -282,14 +283,14 @@ export function ResultEntryForm({
         .map((r) => schools.find((s) => s.id === r.schoolId)?.name || r.schoolId)
         .join(", ");
       setConfirmMessage({
-        title: "Tied Placement Warning",
-        description: `Position #${values.position} in ${selectedEvent.name} is already assigned to ${tiedNames}. Confirming will record a tied placement and award full official points (${scoringPreview.totalPoints} pts) to both schools.`,
+        title: "Tied Placement / Additional Entry Confirmation",
+        description: `Position #${values.position} in ${selectedEvent.name} is already recorded for ${tiedNames}. Confirming will ADD this new entry (+${scoringPreview.totalPoints} pts) without overwriting existing points.`,
       });
       setPendingConfirmPayload(values);
       return;
     }
 
-    await executeSave(values);
+    await executeSave(values, undefined);
   };
 
   return (
@@ -375,16 +376,22 @@ export function ResultEntryForm({
           >
             <option value="">-- Select Participating School --</option>
             {eligibleSchools.map((sch) => {
-              const alreadyEntered = existingResults.some(
+              const schoolEntriesInEvent = existingResults.filter(
                 (r) =>
                   r.eventId === selectedEventId &&
                   r.schoolId === sch.id &&
                   r.id !== initialResultToEdit?.id
               );
+              const existingPts = schoolEntriesInEvent.reduce(
+                (acc, r) => acc + r.totalPoints,
+                0
+              );
               return (
                 <option key={sch.id} value={sch.id}>
                   #{sch.serialNumber} – {sch.name}
-                  {alreadyEntered ? " (Result Already Recorded)" : ""}
+                  {schoolEntriesInEvent.length > 0
+                    ? ` (${schoolEntriesInEvent.length} entry: ${existingPts} pts)`
+                    : ""}
                 </option>
               );
             })}
@@ -396,18 +403,25 @@ export function ResultEntryForm({
           )}
         </div>
 
-        {/* Duplicate Warning Alert */}
-        {duplicateExistingResult && (
-          <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-900">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+        {/* Info Banner when adding another participant/entry for the same school & event */}
+        {existingEntriesForSchoolAndEvent.length > 0 && !initialResultToEdit && (
+          <div className="flex items-start gap-3 rounded-xl border border-royal-200 bg-royal-50 p-3.5 text-xs text-royal-900">
+            <Info className="h-4 w-4 shrink-0 text-royal-600 mt-0.5" />
             <div>
               <p className="font-bold">
-                Existing Result Found for this School &amp; Event
+                Additional Entry for this School in this Event
               </p>
               <p className="mt-0.5">
-                Current record: Grade {duplicateExistingResult.grade} •{" "}
-                {duplicateExistingResult.totalPoints} pts. Saving will prompt
-                for confirmation to overwrite.
+                This school currently has{" "}
+                <strong>{existingEntriesForSchoolAndEvent.length}</strong>{" "}
+                recorded result(s) totaling{" "}
+                <strong>{existingSchoolEventPoints} pts</strong> in this event.
+                Saving will <strong>add +{scoringPreview.totalPoints} pts</strong>{" "}
+                (New Event Total:{" "}
+                <strong>
+                  {existingSchoolEventPoints + scoringPreview.totalPoints} pts
+                </strong>
+                ).
               </p>
             </div>
           </div>
@@ -683,7 +697,7 @@ export function ResultEntryForm({
         </div>
       </div>
 
-      {/* Confirmation Dialog for Overwrite / Edit / Tie */}
+      {/* Confirmation Dialog for Edit / Tie */}
       <ConfirmDialog
         isOpen={Boolean(pendingConfirmPayload)}
         title={confirmMessage.title}
@@ -692,10 +706,7 @@ export function ResultEntryForm({
         variant="warning"
         onConfirm={() => {
           if (pendingConfirmPayload) {
-            executeSave(
-              pendingConfirmPayload,
-              duplicateExistingResult?.id || initialResultToEdit?.id
-            );
+            executeSave(pendingConfirmPayload, initialResultToEdit?.id);
           }
         }}
         onCancel={() => setPendingConfirmPayload(null)}
