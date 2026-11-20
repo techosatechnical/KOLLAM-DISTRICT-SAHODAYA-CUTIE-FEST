@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Radio,
+  Sparkles,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -29,6 +30,29 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
+      {/* Top Scrolling Marquee Banner – Powered by Techosa Robotics */}
+      <div className="w-full overflow-hidden bg-gradient-to-r from-navy-950 via-royal-900 to-navy-950 border-b border-navy-800 py-1.5 text-white">
+        <div className="animate-marquee items-center">
+          {Array.from({ length: 10 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="mx-8 inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase whitespace-nowrap"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-300 shrink-0" />
+              <span className="text-slate-200">
+                KOLLAM DISTRICT SAHODAYA CUTIES&apos; FEST 2026–27 LIVE
+                SCOREBOARD
+              </span>
+              <span className="text-royal-300">•</span>
+              <span className="text-slate-300">POWERED BY</span>
+              <span className="rounded-md bg-amber-400 px-2 py-0.5 text-[11px] font-black text-navy-950 shadow-xs">
+                TECHOSA ROBOTICS
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Competition Logo Placeholder & Official Title */}
         <Link href="/" className="flex items-center gap-3 group">
