@@ -1,8 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Trophy, Medal, Award, ChevronRight, FileDown } from "lucide-react";
+import {
+  Trophy,
+  Medal,
+  Award,
+  ChevronRight,
+  FileDown,
+  Play,
+  Pause,
+} from "lucide-react";
 import { CompetitionCategory, LeaderboardEntry } from "@/types";
 import { downloadScoreboardPdf } from "@/lib/utils/exportPdf";
 
@@ -14,6 +22,8 @@ interface LeaderboardTableProps {
   compact?: boolean;
   maxRows?: number;
   linkToSchoolDetails?: boolean;
+  autoScroll?: boolean;
+  scrollContainerClassName?: string;
 }
 
 export function LeaderboardTable({
@@ -24,8 +34,61 @@ export function LeaderboardTable({
   compact = false,
   maxRows,
   linkToSchoolDetails = true,
+  autoScroll = false,
+  scrollContainerClassName = "",
 }: LeaderboardTableProps) {
   const displayedEntries = maxRows ? entries.slice(0, maxRows) : entries;
+
+  const [isAutoScrollActive, setIsAutoScrollActive] = useState(autoScroll);
+  const [isHovered, setIsHovered] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setIsAutoScrollActive(autoScroll);
+  }, [autoScroll]);
+
+  useEffect(() => {
+    if (!isAutoScrollActive || isHovered) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let direction: "DOWN" | "PAUSE_BOTTOM" | "PAUSE_TOP" = "DOWN";
+    let pauseCounter = 0;
+
+    const timer = window.setInterval(() => {
+      const el = scrollContainerRef.current;
+      if (!el) return;
+
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (maxScroll <= 2) return;
+
+      if (direction === "DOWN") {
+        if (el.scrollTop >= maxScroll - 1) {
+          direction = "PAUSE_BOTTOM";
+          pauseCounter = 0;
+        } else {
+          el.scrollTop += 1;
+        }
+      } else if (direction === "PAUSE_BOTTOM") {
+        pauseCounter += 1;
+        if (pauseCounter >= 60) {
+          el.scrollTo({ top: 0, behavior: "smooth" });
+          direction = "PAUSE_TOP";
+          pauseCounter = 0;
+        }
+      } else if (direction === "PAUSE_TOP") {
+        pauseCounter += 1;
+        if (pauseCounter >= 60) {
+          direction = "DOWN";
+          pauseCounter = 0;
+        }
+      }
+    }, 30);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isAutoScrollActive, isHovered, mode, entries.length]);
 
   const getRankStyle = (rank: number, points: number) => {
     if (points === 0) {
@@ -89,10 +152,33 @@ export function LeaderboardTable({
               <p className="text-xs text-slate-300 mt-0.5">{subtitle}</p>
             )}
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-royal-200">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-royal-200">
             <span className="rounded-full bg-white/10 px-2.5 py-1">
               {entries.length} Schools Ranked
             </span>
+            {autoScroll && (
+              <button
+                type="button"
+                onClick={() => setIsAutoScrollActive((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${
+                  isAutoScrollActive
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/40"
+                    : "bg-white/10 text-slate-300 border border-white/15"
+                }`}
+              >
+                {isAutoScrollActive ? (
+                  <>
+                    <Pause className="h-3.5 w-3.5" />
+                    <span>Auto-Scroll: ON</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3.5 w-3.5" />
+                    <span>Auto-Scroll: PAUSED</span>
+                  </>
+                )}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -132,28 +218,37 @@ export function LeaderboardTable({
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div
+        ref={scrollContainerRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`overflow-x-auto ${
+          autoScroll
+            ? scrollContainerClassName || "max-h-[calc(100vh-230px)] overflow-y-auto"
+            : ""
+        }`}
+      >
         <table className="w-full text-left border-collapse">
-          <thead>
+          <thead className={autoScroll ? "sticky top-0 z-10 shadow-xs" : ""}>
             <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <th className="py-3.5 pl-4 pr-2 sm:px-5 w-24">Rank</th>
-              <th className="py-3.5 px-3 sm:px-4">School</th>
+              <th className="py-3.5 pl-4 pr-2 sm:px-5 w-24 bg-slate-50">Rank</th>
+              <th className="py-3.5 px-3 sm:px-4 bg-slate-50">School</th>
               {!compact && mode === "OVERALL" && (
                 <>
-                  <th className="hidden md:table-cell py-3.5 px-3 text-right">
+                  <th className="hidden md:table-cell py-3.5 px-3 text-right bg-slate-50">
                     Cat I (LKG/UKG)
                   </th>
-                  <th className="hidden md:table-cell py-3.5 px-3 text-right">
+                  <th className="hidden md:table-cell py-3.5 px-3 text-right bg-slate-50">
                     Cat II (Class I/II)
                   </th>
                 </>
               )}
               {!compact && (
-                <th className="hidden sm:table-cell py-3.5 px-3 text-center">
+                <th className="hidden sm:table-cell py-3.5 px-3 text-center bg-slate-50">
                   Placements (1st / 2nd / 3rd)
                 </th>
               )}
-              <th className="py-3.5 pl-3 pr-4 sm:px-5 text-right w-32">
+              <th className="py-3.5 pl-3 pr-4 sm:px-5 text-right w-32 bg-slate-50">
                 {mode === "OVERALL" ? "Combined Points" : "Total Points"}
               </th>
             </tr>
@@ -295,4 +390,3 @@ export function LeaderboardTable({
     </div>
   );
 }
-

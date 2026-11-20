@@ -40,11 +40,10 @@ export function Navbar() {
             >
               <Sparkles className="h-3.5 w-3.5 text-amber-300 shrink-0" />
               <span className="text-slate-200">
-                KOLLAM DISTRICT SAHODAYA CUTIES&apos; FEST 2026–27 LIVE
-                SCOREBOARD
+                KOLLAM DISTRICT SAHODAYA CUTIES&apos; FEST 2026–27
               </span>
               <span className="text-royal-300">•</span>
-              <span className="text-slate-300">POWERED BY</span>
+              <span className="text-slate-300">LIVE SCOREBOARD POWERED BY</span>
               <span className="rounded-md bg-amber-400 px-2 py-0.5 text-[11px] font-black text-navy-950 shadow-xs">
                 TECHOSA ROBOTICS
               </span>
@@ -88,11 +87,10 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${
-                  isActive
+                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors ${isActive
                     ? "bg-royal-50 text-royal-700 border border-royal-200/80"
                     : "text-slate-600 hover:bg-slate-100 hover:text-navy-900"
-                }`}
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -137,11 +135,10 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold ${
-                  isActive
+                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold ${isActive
                     ? "bg-royal-50 text-royal-700"
                     : "text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 {item.label}

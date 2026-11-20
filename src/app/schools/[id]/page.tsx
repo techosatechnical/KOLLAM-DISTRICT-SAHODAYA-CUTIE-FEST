@@ -10,16 +10,20 @@ import {
   CheckCircle2,
   XCircle,
   Sparkles,
+  FileDown,
 } from "lucide-react";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { EventResultTable } from "@/components/results/EventResultTable";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useCompetitionData } from "@/hooks/useCompetitionData";
+import { downloadSchoolReportPdf } from "@/lib/utils/exportPdf";
+import { useToast } from "@/components/common/ToastNotifications";
 
 export default function SchoolDetailPage() {
   const params = useParams<{ id: string }>();
   const schoolId = params?.id || "";
+  const { showToast } = useToast();
 
   const {
     schoolsWithPointsPublic,
@@ -72,7 +76,7 @@ export default function SchoolDetailPage() {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8 space-y-8">
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/schools"
             className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-royal-600 hover:text-royal-700"
@@ -80,6 +84,31 @@ export default function SchoolDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to All 20 Participating Schools
           </Link>
+
+          {school && (
+            <button
+              type="button"
+              onClick={() => {
+                downloadSchoolReportPdf({
+                  school,
+                  cat1Rank,
+                  cat2Rank,
+                  overallRank,
+                  cat1Results,
+                  cat2Results,
+                });
+                showToast({
+                  type: "success",
+                  title: "School Report PDF Downloaded",
+                  message: `Saved points & event-wise report for ${school.name}.`,
+                });
+              }}
+              className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-white shadow-sm hover:bg-royal-700 transition-colors"
+            >
+              <FileDown className="h-4 w-4 text-amber-300" />
+              Download School Report (PDF)
+            </button>
+          )}
         </div>
 
         {isLoading ? (
@@ -97,9 +126,33 @@ export default function SchoolDetailPage() {
             <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-navy-950 via-navy-900 to-royal-900 p-6 sm:p-8 text-white shadow-md">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
-                    <Building2 className="h-3.5 w-3.5" />
-                    School Serial #{school.serialNumber}
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-amber-300">
+                      <Building2 className="h-3.5 w-3.5" />
+                      School Serial #{school.serialNumber}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        downloadSchoolReportPdf({
+                          school,
+                          cat1Rank,
+                          cat2Rank,
+                          overallRank,
+                          cat1Results,
+                          cat2Results,
+                        });
+                        showToast({
+                          type: "success",
+                          title: "School Report PDF Downloaded",
+                          message: `Saved points & event-wise report for ${school.name}.`,
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3.5 py-1 text-xs font-extrabold text-navy-950 shadow-xs hover:bg-amber-300 transition-colors"
+                    >
+                      <FileDown className="h-3.5 w-3.5" />
+                      Download PDF
+                    </button>
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-extrabold">
                     {school.name}
