@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/common/StatCard";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { DownloadScoreboardPdfBar } from "@/components/leaderboard/DownloadScoreboardPdfBar";
 import { GradeBadge } from "@/components/common/GradeBadge";
 import { PositionBadge } from "@/components/common/PositionBadge";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -31,6 +32,7 @@ export default function AdminDashboardPage() {
     enrichedResults,
     category1LeaderboardAdmin,
     category2LeaderboardAdmin,
+    overallLeaderboardAdmin,
     isLoading,
   } = useCompetitionData();
 
@@ -149,6 +151,13 @@ export default function AdminDashboardPage() {
           variant={pendingPublicationResultsCount > 0 ? "orange" : "royal"}
         />
       </div>
+
+      {/* Download Official Scoreboards as PDF */}
+      <DownloadScoreboardPdfBar
+        category1Entries={category1LeaderboardAdmin}
+        category2Entries={category2LeaderboardAdmin}
+        overallEntries={overallLeaderboardAdmin}
+      />
 
       {/* Category I & Category II Leaderboard Previews */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

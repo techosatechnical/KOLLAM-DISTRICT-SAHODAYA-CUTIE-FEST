@@ -5,6 +5,7 @@ import { Award, Trophy, Building2, Calendar } from "lucide-react";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { DownloadScoreboardPdfBar } from "@/components/leaderboard/DownloadScoreboardPdfBar";
 import { EventResultTable } from "@/components/results/EventResultTable";
 import { SearchInput } from "@/components/common/SearchInput";
 import { FilterDropdown } from "@/components/common/FilterDropdown";
@@ -117,6 +118,12 @@ export default function ResultsHubPage() {
             );
           })}
         </div>
+
+        <DownloadScoreboardPdfBar
+          category1Entries={category1LeaderboardPublic}
+          category2Entries={category2LeaderboardPublic}
+          overallEntries={overallLeaderboardPublic}
+        />
 
         {isLoading ? (
           <LoadingSpinner />

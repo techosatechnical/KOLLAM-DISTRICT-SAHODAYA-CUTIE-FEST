@@ -22,6 +22,7 @@ import {
   CategoryTabMode,
 } from "@/components/common/CategoryTabs";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { DownloadScoreboardPdfBar } from "@/components/leaderboard/DownloadScoreboardPdfBar";
 import { StandingsChart } from "@/components/leaderboard/StandingsChart";
 import { EventResultTable } from "@/components/results/EventResultTable";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -272,6 +273,12 @@ export default function HomePage() {
                   }}
                 />
               </div>
+
+              <DownloadScoreboardPdfBar
+                category1Entries={category1LeaderboardPublic}
+                category2Entries={category2LeaderboardPublic}
+                overallEntries={overallLeaderboardPublic}
+              />
 
               {activeTab === "OVERALL" && (
                 <div className="flex items-start gap-2.5 rounded-xl border border-royal-200 bg-royal-50/70 p-3.5 text-xs text-royal-900">

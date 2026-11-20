@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { Trophy, Medal, Award, ChevronRight } from "lucide-react";
+import { Trophy, Medal, Award, ChevronRight, FileDown } from "lucide-react";
 import { CompetitionCategory, LeaderboardEntry } from "@/types";
+import { downloadScoreboardPdf } from "@/lib/utils/exportPdf";
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];
@@ -92,6 +93,41 @@ export function LeaderboardTable({
             <span className="rounded-full bg-white/10 px-2.5 py-1">
               {entries.length} Schools Ranked
             </span>
+            <button
+              type="button"
+              onClick={() => {
+                const modeLabel =
+                  mode === "CATEGORY_I"
+                    ? "Category-I"
+                    : mode === "CATEGORY_II"
+                    ? "Category-II"
+                    : "Overall";
+                downloadScoreboardPdf(
+                  [
+                    {
+                      title:
+                        title ||
+                        (mode === "CATEGORY_I"
+                          ? "CATEGORY I - LKG & UKG LEADERBOARD"
+                          : mode === "CATEGORY_II"
+                          ? "CATEGORY II - CLASS I & II LEADERBOARD"
+                          : "OVERALL COMBINED LEADERBOARD"),
+                      subtitle:
+                        subtitle ||
+                        "Official Kollam District Sahodaya Cuties' Fest 2026-27 Standings",
+                      mode,
+                      entries,
+                    },
+                  ],
+                  `Kollam-Sahodaya-Cuties-Fest-2026-27-${modeLabel}-Scoreboard.pdf`
+                );
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3 py-1.5 text-xs font-extrabold text-navy-950 shadow-xs hover:bg-amber-300 transition-colors"
+              title="Download this scoreboard as PDF"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              <span>Download PDF</span>
+            </button>
           </div>
         </div>
       )}

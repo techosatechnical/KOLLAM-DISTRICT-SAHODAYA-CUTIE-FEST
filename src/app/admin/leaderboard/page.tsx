@@ -6,6 +6,7 @@ import {
   CategoryTabMode,
 } from "@/components/common/CategoryTabs";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { DownloadScoreboardPdfBar } from "@/components/leaderboard/DownloadScoreboardPdfBar";
 import { StandingsChart } from "@/components/leaderboard/StandingsChart";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useCompetitionData } from "@/hooks/useCompetitionData";
@@ -79,6 +80,12 @@ export default function AdminLeaderboardPage() {
           }}
         />
       </div>
+
+      <DownloadScoreboardPdfBar
+        category1Entries={cat1}
+        category2Entries={cat2}
+        overallEntries={overall}
+      />
 
       {activeTab === "CATEGORY_I" && (
         <LeaderboardTable
